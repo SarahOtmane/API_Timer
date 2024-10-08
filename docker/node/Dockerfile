@@ -13,11 +13,10 @@ RUN npm install
 # Copier le reste du code
 COPY ./api/ ./
 
-# Compiler le code TypeScript
-RUN npm install
-
 # Exposer le port (par exemple 3000)
 EXPOSE 3000
 
+RUN npm run build
+
 # Commande pour démarrer l'application
-CMD ["npx", "tsc"]
+CMD ["npm", "run", "dev"]
