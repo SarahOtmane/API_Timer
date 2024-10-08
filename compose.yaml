@@ -1,0 +1,44 @@
+version: '3'
+services:
+  db:
+    build:
+      context: ./docker/mongo
+      dockerfile: Dockerfile
+    container_name: db
+    restart: always
+    volumes:
+      - ./db:/data/db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: ${DB_NAME}
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${DB_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${DB_PASSWORD}
+      ME_CONFIG_MONGODB_SERVER: db
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db
+
+  app:
+    build:
+      context: ./docker/node
+      dockerfile: Dockerfile
+    container_name: node-app
+    volumes:
+      - ./api:/home/node/app/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    env_file:
+      - .env
