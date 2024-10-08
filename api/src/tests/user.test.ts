@@ -87,6 +87,75 @@ describe('User controller', () => {
         });
     });
     
+    describe('POST /login', () => {
+        it('should return 403 if the email is empty', async () => {
+            const response = await supertest(app)
+                .post('/login')
+                .send({
+                    password: 'test',
+                });
+
+            expect(response.statusCode).toBe(400);
+            expect(response.body.message).toBe('Tous les champs sont requis.');
+        });
+
+        it('should return 403 if the password is empty', async () => {
+            const response = await supertest(app)
+                .post('/login')
+                .send({
+                    email: 'sarahotmane@gmail.com',
+                });
+
+            expect(response.statusCode).toBe(400);
+            expect(response.body.message).toBe('Tous les champs sont requis.');
+        });
+
+        it('should return 401 if the email is not found', async () => {
+            const response = await supertest(app)
+                .post('/login')
+                .send({
+                    email: 'nonexistent@gmail.com',
+                    password: 'test',
+                });
+
+            expect(response.statusCode).toBe(401);
+            expect(response.body.message).toBe('Identifiants invalides.');
+        });
+
+        it('should return 401 if the password is incorrect', async () => {
+            await UserModel.create({
+                email: 'sarah1@gmail.com',
+                password: await argon2.hash('correctpassword'),
+            });
+
+            const response = await supertest(app)
+                .post('/login')
+                .send({
+                    email: 'sarah1@gmail.com',
+                    password: 'wrongpassword',
+                });
+
+            expect(response.statusCode).toBe(401);
+            expect(response.body.message).toBe('Identifiants invalides.');
+        });
+
+        it('should return 200 and a token when login is successful', async () => {
+            await UserModel.create({
+                email: 'sarah1@gmail.com',
+                password: await argon2.hash('motdepasse'),
+            });
+
+            const response = await supertest(app)
+                .post('/login')
+                .send({
+                    email: 'sarah1@gmail.com',
+                    password: 'motdepasse',
+                });
+
+            expect(response.statusCode).toBe(200);
+            expect(response.body.token).toBeDefined();
+        });
+    });
     
 });
 
