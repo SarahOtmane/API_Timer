@@ -6,7 +6,7 @@ dotenv.config();
 export const createATimer = async (req: Request, res: Response) => {
     try {
 
-        const newTime = new Timer({ time: req.body.time, user_id: req.user.id });
+        const newTime = new Timer({ time: req.body.time, user_id: req.user?.id });
 
         const time = await newTime.save();
         res.status(200).json(time);
@@ -18,7 +18,7 @@ export const createATimer = async (req: Request, res: Response) => {
 
 export const listAllTimes = async (req: Request, res: Response) => {
     try {
-        const times = await Timer.find({ user_id: req.user.id });
+        const times = await Timer.find({ user_id: req.user?.id });
         if(times.length < 0){
             res.status(404).json({ message: 'Pas de données' });
             return

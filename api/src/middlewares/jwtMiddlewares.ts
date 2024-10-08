@@ -4,6 +4,20 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Définir l'interface UserPayload
+interface UserPayload {
+    id: string; // ou ObjectId si vous utilisez Mongoose ObjectId
+}
+
+// Étendre l'interface Express.Request pour ajouter `user`
+declare global {
+    namespace Express {
+        interface Request {
+            user?: UserPayload; // User est facultatif
+        }
+    }
+}
+
 export const verifyToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const token = req.headers['authorization'];
