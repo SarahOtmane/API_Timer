@@ -1,6 +1,6 @@
 import express, { Application } from 'express';
 import swaggerUi from 'swagger-ui-express';
-import configSwagger from '../config/swagger-config';
+import configSwagger from '../config/swagger.config';
 
 import userRoutes from '../routes/userRoute'; 
 import timerRoutes from '../routes/timerRoute';
