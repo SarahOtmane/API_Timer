@@ -2,12 +2,30 @@
  * @swagger
  * tags:
  *   name: User
- *   description: User management
+ *   description: CRUD operations for managing users
  */
 
 /**
  * @swagger
- * /register:
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - email
+ *         - password
+ *       properties:
+ *         email:
+ *           type: string
+ *           description: The email address of the person
+ *         password:
+ *           type: string
+ *           description: The hashed password of the person
+ */
+
+/**
+ * @swagger
+ * /users/register:
  *   post:
  *     summary: Register a new user
  *     tags: [User]
@@ -16,49 +34,33 @@
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: user@example.com
- *               password:
- *                 type: string
- *                 example: securePassword123
+ *             $ref: '#/components/schemas/User'
  *     responses:
  *       201:
  *         description: User created successfully
  *       403:
- *         description: Missing fields or invalid email format
+ *         description: Missing or invalid fields
  *       409:
  *         description: Email already exists
  *       500:
- *         description: Server error
+ *         description: Internal server error
  */
 
 /**
  * @swagger
- * /login:
+ * /users/login:
  *   post:
- *     summary: Login a user
+ *     summary: Log in a user
  *     tags: [User]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: user@example.com
- *               password:
- *                 type: string
- *                 example: securePassword123
+ *             $ref: '#/components/schemas/User'
  *     responses:
  *       200:
- *         description: User logged in successfully, returns a token
+ *         description: Successfully logged in
  *         content:
  *           application/json:
  *             schema:
@@ -66,11 +68,11 @@
  *               properties:
  *                 token:
  *                   type: string
- *       401:
- *         description: Invalid credentials
+ *                   description: JWT token for authentication
  *       403:
  *         description: Missing fields
+ *       401:
+ *         description: Invalid credentials
  *       500:
- *         description: Server error
+ *         description: Internal server error
  */
-
