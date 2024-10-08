@@ -72,8 +72,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         }
 
         const payload = {
-            id: user._id,
-            email: user.email,
+            id: user._id
         };
 
         // Générez le jeton JWT
