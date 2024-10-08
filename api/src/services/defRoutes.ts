@@ -3,6 +3,7 @@ import swaggerUi from 'swagger-ui-express';
 import configSwagger from '../config/swagger-config';
 
 import userRoutes from '../routes/userRoute'; 
+import timerRoutes from '../routes/timerRoute';
 
 const configureServices = (app: Application): void => {
   // Swagger documentation route
@@ -13,7 +14,9 @@ const configureServices = (app: Application): void => {
   app.use(express.json());
 
   // Define application routes here
-  app.use('/users', userRoutes);
+  app.use('/', userRoutes);
+  app.use('/', timerRoutes);
+
 };
 
 export default configureServices;
