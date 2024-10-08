@@ -5,13 +5,13 @@ FROM node:lts-slim
 WORKDIR /home/node/app/api/
 
 # Copier le package.json et package-lock.json
-COPY ./api/package*.json ./
+COPY ./api/package.json ./
 
 # Installer les dépendances
 RUN npm install
 
 # Copier le reste du code
-COPY . .
+COPY ./api/ ./
 
 # Compiler le code TypeScript
 RUN npm install
@@ -20,4 +20,4 @@ RUN npm install
 EXPOSE 3000
 
 # Commande pour démarrer l'application
-CMD ["node", "dist/app.js"]
+CMD ["npx", "tsc"]
