@@ -4,10 +4,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const connectDB = async (): Promise<void> => {
-    // Vérifier l'environnement actuel
     const isTestEnv: boolean = process.env.NODE_ENV === 'test';
 
-    // Choisir les bonnes variables selon l'environnement
     const dbName: string = isTestEnv ? process.env.DB_NAME_TEST as string : process.env.DB_NAME as string;
 
     try {

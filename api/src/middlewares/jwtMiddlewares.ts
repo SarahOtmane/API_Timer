@@ -6,14 +6,14 @@ dotenv.config();
 
 // Définir l'interface UserPayload
 interface UserPayload {
-    id: string; // ou ObjectId si vous utilisez Mongoose ObjectId
+    id: number;
 }
 
 // Étendre l'interface Express.Request pour ajouter `user`
 declare global {
     namespace Express {
         interface Request {
-            user?: UserPayload; // User est facultatif
+            user?: UserPayload;
         }
     }
 }

@@ -74,11 +74,9 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         const payload = {
             id: user._id
         };
-
-        // Générez le jeton JWT
+        
         const token = jwt.sign(payload, process.env.JWT_KEY as string, { expiresIn: '10h' });
 
-        // Répondez avec le jeton
         res.status(200).json({ token });
     } catch (error) {
         console.error('Erreur lors de la connexion:', error);
