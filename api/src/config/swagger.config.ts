@@ -22,7 +22,7 @@ const options = {
       },
     ],
   },
-  apis: ["./docs/*.ts"], 
+  apis: ["./src/docs/*.ts"], 
 };
 
 const swaggerSpec = swaggerJsdoc(options);
