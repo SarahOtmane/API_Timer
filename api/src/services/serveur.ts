@@ -1,10 +1,15 @@
-import express, { Application } from 'express';
+import { Application } from 'express';
 
-const app: Application = express();
 const port: number = 3000;
 
-const server = app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
+const startServeur = async(app: Application) => {
+    try {
+        app.listen(port, () => {
+            console.log(`Server running on port ${port}`);
+        });
+    } catch (error) {
+        console.log(error)
+    }
+}
 
-export default server;
+export default startServeur;
