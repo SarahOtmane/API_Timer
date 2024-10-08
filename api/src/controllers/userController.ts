@@ -54,7 +54,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            res.status(400).json({ message: 'Tous les champs sont requis.' });
+            res.status(403).json({ message: 'Tous les champs sont requis.' });
             return;
         }
 
@@ -74,7 +74,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         const payload = {
             id: user._id
         };
-        
+
         const token = jwt.sign(payload, process.env.JWT_KEY as string, { expiresIn: '10h' });
 
         res.status(200).json({ token });
