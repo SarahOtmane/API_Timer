@@ -1,6 +1,6 @@
 import supertest from "supertest";
 import mongoose from "mongoose";
-import argon2  from "argon2";
+import argon2 from "argon2";
 import connectDB from "../services/connectDB";
 import configureServices from '../services/defRoutes';
 import UserModel from '../models/userModel';
@@ -10,57 +10,74 @@ const app: Application = express();
 configureServices(app)
 
 describe('User controller', () => {
-    beforeAll(async()=>{
-        await connectDB();
-    })
+    let token: string;
 
-    afterEach(async () => { 
+    beforeAll(async () => {
+        await connectDB();
+
+        const admin = await UserModel.create({
+            email: 'sarah1@gmail.com',
+            password: 'motdepasse',
+            role: false
+        });
+
+        const response = await supertest(app)
+            .post('/login')
+            .send({
+                email: 'sarah1@gmail.com',
+                password: 'motdepasse',
+            });
+
+        token = response.body.token; 
+    });
+
+    afterEach(async () => {
         await mongoose.connection.dropDatabase();
     });
 
-    afterAll(async () => { 
-        await mongoose.disconnect(); 
+    afterAll(async () => {
+        await mongoose.disconnect();
     });
 
     describe('POST /register', () => {
-        it('should return 403 if the email is empty', async() => {
+        it('should return 403 if the email is empty', async () => {
             const response = await supertest(app)
                 .post('/register')
                 .send({
                     password: 'test',
                 });
-    
+
             expect(response.statusCode).toBe(403);
             expect(response.body.message).toBe('Tous les champs sont requis.');
         });
 
-        it('should return 403 if the password is empty', async() => {
+        it('should return 403 if the password is empty', async () => {
             const response = await supertest(app)
                 .post('/register')
                 .send({
                     email: 'sarahotmane@gmail.com',
                 });
-    
+
             expect(response.statusCode).toBe(403);
             expect(response.body.message).toBe('Tous les champs sont requis.');
         });
 
-        it('should return 403 if the email is not correct', async() => {
+        it('should return 403 if the email format is invalid', async () => {
             const response = await supertest(app)
                 .post('/register')
                 .send({
                     email: 'sarahotmane',
                     password: 'test'
                 });
-    
+
             expect(response.statusCode).toBe(403);
             expect(response.body.message).toBe('Format d\'email invalide.');
         });
 
-        it('should return 409 if the email is already used', async() => {
+        it('should return 409 if the email is already used', async () => {
             await UserModel.create({
                 email: 'sarah1@gmail.com',
-                password: 'motdepasse',
+                password: await argon2.hash('motdepasse'),
             });
 
             const response = await supertest(app)
@@ -69,24 +86,24 @@ describe('User controller', () => {
                     email: 'sarah1@gmail.com',
                     password: 'motdepasse',
                 });
-    
+
             expect(response.statusCode).toBe(409);
             expect(response.body.message).toBe('Cet email existe déjà.');
         });
 
-        it('should return 201 when creating a new user', async() => {
+        it('should return 201 when creating a new user', async () => {
             const response = await supertest(app)
                 .post('/register')
                 .send({
                     email: 'sarah1@gmail.com',
                     password: 'motdepasse',
                 });
-    
+
             expect(response.statusCode).toBe(201);
             expect(response.body.message).toBe('Utilisateur créé avec succès.');
         });
     });
-    
+
     describe('POST /login', () => {
         it('should return 403 if the email is empty', async () => {
             const response = await supertest(app)
@@ -95,7 +112,7 @@ describe('User controller', () => {
                     password: 'test',
                 });
 
-            expect(response.statusCode).toBe(400);
+            expect(response.statusCode).toBe(403);
             expect(response.body.message).toBe('Tous les champs sont requis.');
         });
 
@@ -106,7 +123,7 @@ describe('User controller', () => {
                     email: 'sarahotmane@gmail.com',
                 });
 
-            expect(response.statusCode).toBe(400);
+            expect(response.statusCode).toBe(403);
             expect(response.body.message).toBe('Tous les champs sont requis.');
         });
 
@@ -156,6 +173,76 @@ describe('User controller', () => {
             expect(response.body.token).toBeDefined();
         });
     });
-    
-});
 
+    describe('GET /admin/users', () => {
+        it('should return 200 and an array of users', async () => {
+            await UserModel.create({ email: 'user1@gmail.com', password: 'password1' });
+            await UserModel.create({ email: 'user2@gmail.com', password: 'password2' });
+
+            const response = await supertest(app)
+                .get('/admin/users')
+                .set('Authorization', token);
+
+            expect(response.statusCode).toBe(200);
+            expect(response.body).toHaveLength(2); 
+        });
+
+        it('should return 404 if no users are found', async () => {
+            const response = await supertest(app)
+                .get('/admin/users')
+                .set('Authorization', token );
+
+            expect(response.statusCode).toBe(404);
+            expect(response.body.message).toBe('Pas de données');
+        });
+    });
+
+    describe('GET /admin/user/:id', () => {
+        it('should return 200 and the user object when a user is found', async () => {
+            const user = await UserModel.create({ email: 'user1@gmail.com', password: 'password1' });
+
+            const response = await supertest(app)
+                .get(`/admin/user/${user._id}`)
+                .set('Authorization', token );
+
+            expect(response.statusCode).toBe(200);
+            expect(response.body).toMatchObject({
+                email: 'user1@gmail.com',
+            });
+        });
+
+        it('should return 404 if the user does not exist', async () => {
+            const response = await supertest(app)
+                .get('/admin/user/605c72b8f1b2f7245c8c1d90') // ID fictif
+                .set('Authorization', token );
+
+            expect(response.statusCode).toBe(404);
+            expect(response.body.message).toBe('L utilisateur n existe pas');
+        });
+    });
+
+    describe('DELETE /admin/user/:id', () => {
+        it('should return 200 and delete the user if found', async () => {
+            const user = await UserModel.create({ email: 'user1@gmail.com', password: 'password1' });
+
+            const response = await supertest(app)
+                .delete(`/admin/user/${user._id}`)
+                .set('Authorization', token);
+
+            expect(response.statusCode).toBe(200);
+            expect(response.body.message).toBe('L utilisateur a été supprimer');
+
+            const deletedUser = await UserModel.findById(user._id);
+            expect(deletedUser).toBeNull();
+        });
+
+        it('should return 404 if the user does not exist', async () => {
+            const response = await supertest(app)
+                .delete('/admin/user/605c72b8f1b2f7245c8c1d90') 
+                .set('Authorization', token); 
+
+            expect(response.statusCode).toBe(404);
+            expect(response.body.message).toBe('L utilisateur n existe pas');
+        });
+    });
+});
