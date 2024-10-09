@@ -110,7 +110,7 @@ export const getUserById = async(req: Request, res: Response) : Promise<void> =>
                 return
             }
 
-            res.status(200).json(user)
+            res.status(200).json(user.email)
     } catch (error) {
         console.error('Erreur lors de la connexion:', error);
         res.status(500).json({ message: 'Erreur lors de la connexion.' });
