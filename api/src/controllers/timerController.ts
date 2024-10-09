@@ -19,7 +19,7 @@ export const createATimer = async (req: Request, res: Response) => {
 export const listAllTimes = async (req: Request, res: Response) => {
     try {
         const times = await Timer.find({ user_id: req.user?.id });
-        if(times.length < 0){
+        if(times.length === 0){
             res.status(404).json({ message: 'Pas de données' });
             return
         }
