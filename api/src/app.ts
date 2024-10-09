@@ -10,3 +10,5 @@ const app: Application = express();
 connectDB();
 configureServices(app);
 startServeur(app);
+
+export default app;
