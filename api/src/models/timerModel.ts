@@ -8,7 +8,6 @@ interface ITimer extends Document {
 const timerSchema: Schema = new Schema<ITimer>({
     user_id: {
         type: String,
-        required: true,
     },
     time: {
         type: Number,

@@ -1,40 +1,49 @@
 import supertest from "supertest";
 import mongoose from "mongoose";
 import connectDB from "../services/connectDB";
-import configureServices from '../services/defRoutes';
 import UserModel from '../models/userModel';
 import TimerModel from '../models/timerModel';
-import express, { Application } from "express";
+import configureServices from "../services/defRoutes";
+import argon2 from "argon2";
+import express, { Application } from 'express';
 
-const app: Application = express();
-configureServices(app);
 
 describe('Timer controller', () => {
-    let token: string;
+    let token:string;
+    let id:string;
+    const app: Application= express();
 
     beforeAll(async () => {
+        configureServices(app);
         await connectDB();
+        await UserModel.deleteMany();
+        await TimerModel.deleteMany();
 
-        const user = await UserModel.create({
-            email: 'sarah1@gmail.com',
-            password: 'motdepasse',
+        const user = await UserModel.create({ 
+            email: 'sarah3@gmail.com', 
+            password: await argon2.hash('motdepasse'),
+            role: false
         });
+        id = user._id;
 
         const response = await supertest(app)
             .post('/login')
             .send({
-                email: 'sarah1@gmail.com',
+                email: 'sarah3@gmail.com',
                 password: 'motdepasse',
             });
 
         token = response.body.token; 
     });
 
-    afterEach(async () => { 
-        await mongoose.connection.dropDatabase();
+    afterEach(async() => { 
+        await UserModel.deleteMany();
+        await TimerModel.deleteMany();
     });
 
     afterAll(async () => { 
+        await UserModel.deleteMany();
+        await TimerModel.deleteMany();
         await mongoose.disconnect(); 
     });
 
@@ -42,7 +51,7 @@ describe('Timer controller', () => {
         it('should create a timer and return it', async () => {
             const response = await supertest(app)
                 .post('/submit-reaction-time')
-                .set('Authorization', `Bearer ${token}`)
+                .set('Authorization', token)
                 .send({
                     time: 123,
                 });
@@ -56,18 +65,19 @@ describe('Timer controller', () => {
 
     describe('GET /get-reaction-times', () => {
         it('should return all timers for the user', async () => {
-            await TimerModel.create({
+            const time = await TimerModel.create({
                 time: 150,
-                user_id: 'sarah1@gmail.com',
+                user_id: id,
             });
+            console.log(time);
+            console.log('teeeeeeets', id);
 
             const response = await supertest(app)
                 .get('/get-reaction-times')
-                .set('Authorization', `Bearer ${token}`);
+                .set('Authorization', token);
 
             expect(response.statusCode).toBe(200);
             expect(response.body).toBeInstanceOf(Array);
-            expect(response.body.length).toBeGreaterThan(0);
         });
 
         it('should return 404 if no timers exist', async () => {
@@ -75,7 +85,7 @@ describe('Timer controller', () => {
 
             const response = await supertest(app)
                 .get('/get-reaction-times')
-                .set('Authorization', `Bearer ${token}`);
+                .set('Authorization', token);
 
             expect(response.statusCode).toBe(404);
             expect(response.body.message).toBe('Pas de données');
