@@ -3,7 +3,7 @@ import { Application } from 'express';
 const startServeur = async(app: Application) => {
     const isTestEnv: boolean = process.env.NODE_ENV === 'test';
 
-    const port: number = isTestEnv ? 30001 : 30000;
+    const port: number = isTestEnv ? 3001 : 3000;
 
     try {
         app.listen(port, () => {
