@@ -1,13 +1,10 @@
 import supertest from "supertest";
 import mongoose from "mongoose";
 import connectDB from "../services/connectDB";
-import configureServices from '../services/defRoutes';
 import UserModel from '../models/userModel';
 import TimerModel from '../models/timerModel';
-import express, { Application } from "express";
+import app from '../app'
 
-const app: Application = express();
-configureServices(app);
 
 describe('Timer controller', () => {
     let token: string;

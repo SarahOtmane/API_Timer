@@ -1,25 +1,24 @@
+import app from '../app';
 import supertest from "supertest";
 import mongoose from "mongoose";
 import argon2 from "argon2";
 import connectDB from "../services/connectDB";
-import configureServices from '../services/defRoutes';
 import UserModel from '../models/userModel';
-import express, { Application } from "express";
 
-const app: Application = express();
-configureServices(app)
 
 describe('User controller', () => {
-    let token: string;
+    let token:string;
 
     beforeAll(async () => {
         await connectDB();
-
-        const admin = await UserModel.create({
-            email: 'sarah1@gmail.com',
-            password: 'motdepasse',
-            role: false
-        });
+        
+        await supertest(app)
+            .post('/register')
+            .send({
+                email: 'sarah1@gmail.com',
+                password: 'motdepasse',
+                role: false
+            })
 
         const response = await supertest(app)
             .post('/login')
@@ -27,7 +26,6 @@ describe('User controller', () => {
                 email: 'sarah1@gmail.com',
                 password: 'motdepasse',
             });
-
         token = response.body.token; 
     });
 

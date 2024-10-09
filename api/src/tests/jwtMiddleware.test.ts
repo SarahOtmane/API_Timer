@@ -1,11 +1,8 @@
 import supertest from "supertest";
 import mongoose from "mongoose";
-import express, { Application } from "express";
 import connectDB from "../services/connectDB";
-import configureServices from '../services/defRoutes';
 
-const app: Application = express();
-configureServices(app);
+import app from '../app'
 
 describe('JWT Middleware - verifyToken', () => {
     beforeAll(async () => {
