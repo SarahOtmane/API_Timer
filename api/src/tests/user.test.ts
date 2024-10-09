@@ -8,7 +8,7 @@ import UserModel from '../models/userModel';
 
 describe('User controller', () => {
     let token:string;
-    let userId;
+    let userId:string;
 
     beforeAll(async () => {
         await connectDB();

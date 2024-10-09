@@ -3,22 +3,23 @@ import mongoose from "mongoose";
 import connectDB from "../services/connectDB";
 import UserModel from '../models/userModel';
 import TimerModel from '../models/timerModel';
-import app from '../app'
+import app from '../app';
+import argon2 from "argon2";
 
 
 describe('Timer controller', () => {
-    let token: string;
-    let id : string
+    let token:string;
+    let id:string;
 
     beforeAll(async () => {
         await connectDB();
 
-        const userResponse = await supertest(app)
-            .post('/register')
-            .send({
-                email: 'sarah1@gmail.com',
-                password: 'motdepasse',
-            });
+        const user = await UserModel.create({ 
+            email: 'sarah1@gmail.com', 
+            password: await argon2.hash('motdepasse'),
+            role: false
+        });
+        id = user._id;
 
         const response = await supertest(app)
             .post('/login')
@@ -56,10 +57,12 @@ describe('Timer controller', () => {
 
     describe('GET /get-reaction-times', () => {
         it('should return all timers for the user', async () => {
-            await TimerModel.create({
+            const time = await TimerModel.create({
                 time: 150,
                 user_id: id,
             });
+            console.log(time);
+            console.log('teeeeeeets', id);
 
             const response = await supertest(app)
                 .get('/get-reaction-times')
