@@ -3,19 +3,24 @@ import mongoose from "mongoose";
 import connectDB from "../services/connectDB";
 import UserModel from '../models/userModel';
 import TimerModel from '../models/timerModel';
-import app from '../app';
+import configureServices from "../services/defRoutes";
 import argon2 from "argon2";
+import express, { Application } from 'express';
 
 
 describe('Timer controller', () => {
     let token:string;
     let id:string;
+    const app: Application= express();
 
     beforeAll(async () => {
+        configureServices(app);
         await connectDB();
+        await UserModel.deleteMany();
+        await TimerModel.deleteMany();
 
         const user = await UserModel.create({ 
-            email: 'sarah1@gmail.com', 
+            email: 'sarah3@gmail.com', 
             password: await argon2.hash('motdepasse'),
             role: false
         });
@@ -24,18 +29,21 @@ describe('Timer controller', () => {
         const response = await supertest(app)
             .post('/login')
             .send({
-                email: 'sarah1@gmail.com',
+                email: 'sarah3@gmail.com',
                 password: 'motdepasse',
             });
 
         token = response.body.token; 
     });
 
-    afterEach(async () => { 
-        await mongoose.connection.dropDatabase();
+    afterEach(async() => { 
+        await UserModel.deleteMany();
+        await TimerModel.deleteMany();
     });
 
     afterAll(async () => { 
+        await UserModel.deleteMany();
+        await TimerModel.deleteMany();
         await mongoose.disconnect(); 
     });
 

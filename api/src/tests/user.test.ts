@@ -4,16 +4,22 @@ import mongoose from "mongoose";
 import argon2 from "argon2";
 import connectDB from "../services/connectDB";
 import UserModel from '../models/userModel';
+import express, { Application } from 'express';
+import configureServices from "../services/defRoutes";
 
 
 describe('User controller', () => {
     let token:string;
     let userId:string;
+    const app: Application= express();
 
     beforeAll(async () => {
+        configureServices(app);
         await connectDB();
+        await UserModel.deleteMany();
+
         const user = await UserModel.create({ 
-            email: 'sarah1@gmail.com', 
+            email: 'sarah2@gmail.com', 
             password: await argon2.hash('motdepasse'),
             role: false
         });
@@ -22,17 +28,18 @@ describe('User controller', () => {
         const response = await supertest(app)
             .post('/login')
             .send({
-                email: 'sarah1@gmail.com',
+                email: 'sarah2@gmail.com',
                 password: 'motdepasse',
             });
         token = response.body.token; 
     });
 
-    afterEach(async () => {
-        await mongoose.connection.dropDatabase();
+    afterEach(async() => { 
+        await UserModel.deleteMany();
     });
 
     afterAll(async () => {
+        await UserModel.deleteMany();
         await mongoose.disconnect();
     });
 
@@ -138,14 +145,14 @@ describe('User controller', () => {
 
         it('should return 401 if the password is incorrect', async () => {
             await UserModel.create({
-                email: 'sarah1@gmail.com',
+                email: 'sarah@gmail.com',
                 password: await argon2.hash('correctpassword'),
             });
 
             const response = await supertest(app)
                 .post('/login')
                 .send({
-                    email: 'sarah1@gmail.com',
+                    email: 'sarah@gmail.com',
                     password: 'wrongpassword',
                 });
 
@@ -155,14 +162,14 @@ describe('User controller', () => {
 
         it('should return 200 and a token when login is successful', async () => {
             await UserModel.create({
-                email: 'sarah1@gmail.com',
+                email: 'sarahhh@gmail.com',
                 password: await argon2.hash('motdepasse'),
             });
 
             const response = await supertest(app)
                 .post('/login')
                 .send({
-                    email: 'sarah1@gmail.com',
+                    email: 'sarahhh@gmail.com',
                     password: 'motdepasse',
                 });
 
