@@ -3,12 +3,13 @@ import argon2 from 'argon2';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel';
+import { resolve } from 'path';
 
 dotenv.config();
 
 export const registerAUser = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { email, password } = req.body;
+        const { email, password, role } = req.body;
 
         // Check for missing fields
         if (!email || !password) {
@@ -37,6 +38,7 @@ export const registerAUser = async (req: Request, res: Response): Promise<void> 
         const newUser = new User({
             email: email,
             password: hashedPassword,
+            role: role ? role : true
         });
         await newUser.save();
 
@@ -72,7 +74,8 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         }
 
         const payload = {
-            id: user._id
+            id: user._id,
+            role: user.role
         };
 
         const token = jwt.sign(payload, process.env.JWT_KEY as string, { expiresIn: '10h' });
@@ -99,4 +102,32 @@ export const getAllUser = async(req: Request, res: Response) : Promise<void> =>{
     }
 }
 
+export const getUserById = async(req: Request, res: Response) : Promise<void> =>{
+    try {
+        const user = await User.find({_id : req.params.id})
+            if(!user){
+                res.status(404).json({ message: 'L utilisateur n existe pas' });
+                return
+            }
 
+            res.status(200).json(user)
+    } catch (error) {
+        console.error('Erreur lors de la connexion:', error);
+        res.status(500).json({ message: 'Erreur lors de la connexion.' });
+    }
+}  
+        
+export const deleteAUser = async(req: Request, res: Response) : Promise<void> =>{
+    try {
+        const user = await User.deleteOne({_id : req.params.id})
+            if(!user){
+                res.status(404).json({ message: 'L utilisateur n existe pas' });
+                return
+            }
+
+            res.status(200).json({ message: 'L utilisateur a été supprimer' })
+    } catch (error) {
+        console.error('Erreur lors de la connexion:', error);
+        res.status(500).json({ message: 'Erreur lors de la connexion.' });
+    }
+} 
