@@ -10,6 +10,6 @@
     "rootDir": "./src",  // Répertoire racine des sources
     "types": ["jest", "node"]  // Inclure les types de Jest et Node.js
   },
-  "include": ["src/**/*.ts"],  // Inclure tous les fichiers .ts
+  "include": ["src/**/*.ts", "src/config/jest.config.js"], 
   "exclude": ["node_modules", "dist"]
 }
