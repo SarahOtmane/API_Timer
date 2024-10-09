@@ -84,5 +84,19 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+export const getAllUser = async(req: Request, res: Response) : Promise<void> =>{
+    try {
+        const users = await User.find();
+        if(users.length < 0){
+            res.status(404).json({ message: 'Pas de données' });
+            return
+        }
+        res.status(200).json(users);
+
+    } catch (error) {
+        console.error('Erreur lors de la connexion:', error);
+        res.status(500).json({ message: 'Erreur lors de la connexion.' });
+    }
+}
 
 
