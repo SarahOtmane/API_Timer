@@ -9,7 +9,7 @@ router.post('/login', userController.loginUser);
 
 // ROUTES ADMIN
 router.get('/admin/users', jwtMiddlewares.verifyTokenAdmin, userController.getAllUser);
-router.get('/admin/user/:id', jwtMiddlewares.verifyTokenAdmin, userController.getAllUser);
+router.get('/admin/user/:id', jwtMiddlewares.verifyTokenAdmin, userController.getUserById);
 router.delete('/admin/user/:id', jwtMiddlewares.verifyTokenAdmin, userController.deleteAUser);
 
 export default router;
