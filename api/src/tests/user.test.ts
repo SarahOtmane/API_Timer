@@ -8,17 +8,16 @@ import UserModel from '../models/userModel';
 
 describe('User controller', () => {
     let token:string;
+    let userId;
 
     beforeAll(async () => {
         await connectDB();
-        
-        await supertest(app)
-            .post('/register')
-            .send({
-                email: 'sarah1@gmail.com',
-                password: 'motdepasse',
-                role: false
-            })
+        const user = await UserModel.create({ 
+            email: 'sarah1@gmail.com', 
+            password: await argon2.hash('motdepasse'),
+            role: false
+        });
+        userId = user._id;
 
         const response = await supertest(app)
             .post('/login')
@@ -174,8 +173,8 @@ describe('User controller', () => {
 
     describe('GET /admin/users', () => {
         it('should return 200 and an array of users', async () => {
-            await UserModel.create({ email: 'user1@gmail.com', password: 'password1' });
-            await UserModel.create({ email: 'user2@gmail.com', password: 'password2' });
+            await UserModel.create({ email: 'user1@gmail.com', password: await argon2.hash('correctpassword') });
+            await UserModel.create({ email: 'user2@gmail.com', password: await argon2.hash('correctpassword') });
 
             const response = await supertest(app)
                 .get('/admin/users')
@@ -197,21 +196,19 @@ describe('User controller', () => {
 
     describe('GET /admin/user/:id', () => {
         it('should return 200 and the user object when a user is found', async () => {
-            const user = await UserModel.create({ email: 'user1@gmail.com', password: 'password1' });
+            const user = await UserModel.create({ email: 'user1@gmail.com', password: await argon2.hash('correctpassword') });
 
             const response = await supertest(app)
                 .get(`/admin/user/${user._id}`)
                 .set('Authorization', token );
 
             expect(response.statusCode).toBe(200);
-            expect(response.body).toMatchObject({
-                email: 'user1@gmail.com',
-            });
+            expect(response.body).toBe('user1@gmail.com');
         });
 
         it('should return 404 if the user does not exist', async () => {
             const response = await supertest(app)
-                .get('/admin/user/605c72b8f1b2f7245c8c1d90') // ID fictif
+                .get('/admin/user/605c72b8f1b2f7245c8c1d90') 
                 .set('Authorization', token );
 
             expect(response.statusCode).toBe(404);
@@ -221,14 +218,14 @@ describe('User controller', () => {
 
     describe('DELETE /admin/user/:id', () => {
         it('should return 200 and delete the user if found', async () => {
-            const user = await UserModel.create({ email: 'user1@gmail.com', password: 'password1' });
+            const user = await UserModel.create({ email: 'user1@gmail.com', password: await argon2.hash('correctpassword') });
 
             const response = await supertest(app)
                 .delete(`/admin/user/${user._id}`)
                 .set('Authorization', token);
 
             expect(response.statusCode).toBe(200);
-            expect(response.body.message).toBe('L utilisateur a été supprimer');
+            expect(response.body.message).toBe('L utilisateur a été supprimé');
 
             const deletedUser = await UserModel.findById(user._id);
             expect(deletedUser).toBeNull();
