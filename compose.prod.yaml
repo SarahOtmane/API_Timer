@@ -1,0 +1,37 @@
+services:
+  api:
+    build:
+      context: ./
+      dockerfile: docker/node/Dockerfile.prod
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    restart: always  #config docker pour redemarrer automatiquement le container s'il s'arrete
+    labels:
+      - "traefik.enable=true"   #activer le routage de traefic pour ce service
+      - "traefik.http.routers.node.rule=Host(`f1-api.devprod.fr`)"    #Définit la règle de routage en fonction du domaine
+      - "traefik.http.routers.node.entrypoints=websecure"  #Utilise le point d’entrée websecure pour la communication sécurisée
+      - "traefik.http.routers.node.tls.certresolver=myresolver"  #Utilise myresolver pour obtenir un certificat TLS
+    networks: 
+      - traefik_routing
+
+  mongo:
+    build:
+      context: ./
+      dockerfile: docker/mongo/Dockerfile
+    ports:
+      - "27017:27017"
+    restart: always
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - traefik_routing
+volumes:
+  mongo-data:
+
+networks:
+  traefik_routing:
+    external: true
