@@ -1,22 +1,27 @@
 # Utiliser l'image Node.js officielle
-FROM node:lts-slim
+FROM node:20.17-slim
 
 # Créer un dossier de travail
-WORKDIR /home/node/app/api/
+WORKDIR /home/node/app
 
 # Copier le package.json et package-lock.json
-COPY ./api/package.json ./
+COPY ./api/package*.json ./
 
 # Installer les dépendances
-RUN npm install
+RUN npm install --ignore-scripts
 
 # Copier le reste du code
-COPY ./api/ ./
+COPY ./api .
 
 # Exposer le port (par exemple 3000)
 EXPOSE 3000
 
 RUN npm run build
+
+ENV TZ=Europe/Paris
+
+#pour que l utilisateur ne soit pas root => couche de securite : l utilisateur node n a pas les droits de faire des install
+USER node
 
 # Commande pour démarrer l'application
 CMD ["npm", "run", "dev"]
