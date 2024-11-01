@@ -1,15 +1,25 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "commonjs",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",  // Compiler les fichiers dans dist
-    "rootDir": "./src",  // Répertoire racine des sources
-    "types": ["jest", "node"]  // Inclure les types de Jest et Node.js
+      "target": "ES6", // Version ECMAScript cible
+      "module": "commonjs", // Système de modules utilisé
+      "rootDir": "src", // Répertoire racine des fichiers source
+      "outDir": "dist", // Répertoire de sortie des fichiers compilés
+      "strict": true, // Activer toutes les vérifications strictes
+      "esModuleInterop": true, // Activer l'interopérabilité des modules ES
+      "skipLibCheck": true, // Ignorer la vérification des fichiers de définition de bibliothèque
+      "forceConsistentCasingInFileNames": true, // Forcer la casse cohérente dans les noms de fichiers
+      "resolveJsonModule": true, // Permettre l'importation de modules JSON
+      "types": [
+          "node", // Types pour Node.js
+          "jest" // Types pour Jest
+      ]
   },
-  "include": ["src/**/*.ts", "jest.config.js"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+      "src/**/*.ts", // Inclure tous les fichiers TypeScript dans src
+      // "../auth.integration.test.ts" // Inclure le fichier auth.integration.test.ts
+  ],
+  "exclude": [
+      "node_modules", // Exclure le répertoire node_modules
+      "dist" // Exclure le répertoire dist
+  ]
 }
